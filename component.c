@@ -17,7 +17,7 @@ enum ERRCODE init_component_table(int32_t capacity){
 	
 	if(!g_componenttable){
 		/* Just create the table */
-		printf("Size of requested table: %d\n", sizeof *g_componenttable * capacity);
+		printf("Size of requested table: %zu\n", sizeof *g_componenttable * capacity);
 		
 		int perr = errno;
 		errno = 0;

@@ -133,5 +133,5 @@ void entity_set_component(struct entity *obj, struct component *data){
 	
 	ensure_component_table_has_entry(obj->m_tableidx);
 	
-	*g_componenttable[obj->m_tableidx]->p_components[data->m_id]->p_entry = *data;
+	g_componenttable[obj->m_tableidx]->p_components[data->m_id]->p_entry = data;
 }
