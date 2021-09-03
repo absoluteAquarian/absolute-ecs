@@ -17,7 +17,9 @@ enum ERRCODE init_component_table(int32_t capacity){
 	
 	if(!g_componenttable){
 		/* Just create the table */
+#ifdef DEBUG_INFO
 		printf("Size of requested table: %zu\n", sizeof *g_componenttable * capacity);
+#endif
 		
 		int perr = errno;
 		errno = 0;
@@ -26,11 +28,14 @@ enum ERRCODE init_component_table(int32_t capacity){
 		if(perr != errno){
 			fprintf(stderr, "(code %d) Error allocating memory: %s\n", errno, strerror(errno));
 			fprintf(stderr, "Total allocation by \"malloc_debug\": %d\n", g_totalalloc);
+			log_err_lf(RESULT_INIT_COMPONENT_TABLE_CAPACITY);
 		}
 		
 		g_componenttable_capacity = capacity;
 		
+#ifdef DEBUG_INFO
 		printf("(init_component_table, new) Initialized component table? %s\n", g_componenttable ? "true" : "false");
+#endif
 	}else if(capacity > g_componenttable_capacity){
 		/* Resize the table */
 		struct component_table **old_table = g_componenttable;
@@ -44,7 +49,9 @@ enum ERRCODE init_component_table(int32_t capacity){
 		
 		g_componenttable_capacity = capacity;
 		
+#ifdef DEBUG_INFO
 		printf("(init_component_table, resize) Initialized component table? %s\n", g_componenttable ? "true" : "false");
+#endif
 	}
 	
 	return RESULT_OK;
@@ -66,7 +73,9 @@ void ensure_component_table_has_entry(int32_t entity_idx, enum COMPONENT_TYPE ty
 }
 
 struct component *create_component(int32_t parent, void *data, enum COMPONENT_TYPE type){
+#ifdef DEBUG_INFO
 	printf("Creating component of ID %d\n", (int32_t)type);
+#endif
 	
 	enum ERRCODE errcode;
 	
@@ -81,7 +90,9 @@ struct component *create_component(int32_t parent, void *data, enum COMPONENT_TY
 	if(type < 0 || type >= COMPONENT_COUNT)
 		log_err_lf(RESULT_INVALID_COMPONENT_TYPE);
 	
+#ifdef DEBUG_INFO
 	puts("Type and parent are both valid");
+#endif
 	
 	if(!g_componenttable){
 		errcode = init_component_table(8);

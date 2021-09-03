@@ -13,6 +13,8 @@
 	
 #define ALLOC(VALUE, SCALAR) VALUE = malloc_debug(sizeof *VALUE * (SCALAR))
 #define ENSURE_ALLOC(VALUE, SCALAR) do{ if(!VALUE) ALLOC(VALUE, SCALAR); }while(0)
+	
+/* #define DEBUG_INFO */
 
 extern size_t g_totalalloc;
 
