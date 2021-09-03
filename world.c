@@ -19,12 +19,12 @@ enum ERRCODE W_init(int32_t capacity){
 	
 	if(!g_worlds){
 		/* Create the world table */
-		g_worlds = malloc(sizeof *g_worlds * capacity);
+		ALLOC(g_worlds, capacity);
 		g_worldCount = capacity;
 	}else if(capacity > g_worldCount){
 		/* Resize the table */
 		struct world **oldTable = g_worlds;
-		g_worlds = malloc_debug(sizeof *g_worlds * capacity);
+		ALLOC(g_worlds, capacity);
 		
 		/* Copy the old values to the new array */
 		memcpy(g_worlds, oldTable, sizeof *g_worlds * g_worldCount);
@@ -76,10 +76,9 @@ int32_t W_create(){
 	}
 	
 	/* Create the world */
-	struct world *existing = *(g_worlds + freeIdx);
-	bool null_world = !existing;
+	struct world *obj = *(g_worlds + freeIdx);
 	
-	struct world *obj = null_world ? malloc(sizeof *obj) : existing;
+	ENSURE_ALLOC(obj, 1);
 	
 #ifdef DEBUG_INFO
 	puts("Initializing data members...");

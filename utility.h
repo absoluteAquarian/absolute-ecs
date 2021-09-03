@@ -11,8 +11,17 @@
 
 #define REPORT_ADDR(x) do{ printf("ADDRESS FOR VALUE \"" STRINGIFY(x) "\": 0x%08x\n", &x); }while(0)
 
-#define ALLOC(VALUE, SCALAR) VALUE = malloc_debug(sizeof *(VALUE) * (SCALAR))
-#define ENSURE_ALLOC(VALUE, SCALAR) do{ if(!VALUE) ALLOC(VALUE, SCALAR); }while(0)
+#define ALLOC(VALUE, SCALAR) do{ \
+		VALUE = malloc_debug(sizeof *(VALUE) * (SCALAR)); \
+		memset(VALUE, 0, sizeof *(VALUE) * (SCALAR));\
+	}while(0)
+
+#define ENSURE_ALLOC(VALUE, SCALAR) do{ \
+		if(!VALUE){ \
+			VALUE = malloc_debug(sizeof *(VALUE) * (SCALAR)); \
+			memset(VALUE, 0, sizeof *(VALUE) * (SCALAR)); \
+		} \
+	}while(0)
 
 extern size_t g_totalalloc;
 

@@ -45,7 +45,7 @@ enum ERRCODE E_init(int32_t i_worldID, int32_t capacity){
 #endif
 		/* Resize the table */
 		struct entity **old_table = p_world->p_entityTable;
-		p_world->p_entityTable = malloc_debug(sizeof *p_world->p_entityTable * capacity);
+		ALLOC(p_world->p_entityTable, capacity);
 		
 		/* Copy the old values to the new array */
 		memcpy(p_world->p_entityTable, old_table, sizeof *p_world->p_entityTable * p_world->m_etCapacity);
@@ -130,10 +130,9 @@ int32_t E_create(int32_t i_worldID){
 #endif
 	
 	/* Create the entity */
-	struct entity *existing = *(p_world->p_entityTable + free_idx);
-	bool null_entity = !existing;
+	struct entity *obj = *(p_world->p_entityTable + free_idx);
 	
-	struct entity *obj = null_entity ? malloc_debug(sizeof *obj) : existing;
+	ENSURE_ALLOC(obj, 1);
 	
 #ifdef DEBUG_INFO
 	puts("Initializing data members...");
