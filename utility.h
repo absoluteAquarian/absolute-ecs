@@ -17,7 +17,7 @@
 	}while(0)
 
 #define ENSURE_ALLOC(VALUE, SCALAR) do{ \
-		if(!VALUE){ \
+		if(!(VALUE)){ \
 			VALUE = malloc_debug(sizeof *(VALUE) * (SCALAR)); \
 			memset(VALUE, 0, sizeof *(VALUE) * (SCALAR)); \
 		} \
