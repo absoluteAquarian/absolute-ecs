@@ -1,5 +1,5 @@
-#ifndef COMPONENT_H_
-#define COMPONENT_H_
+#ifndef ECS_COMPONENT_H_
+#define ECS_COMPONENT_H_
 
 #include <stdint.h>
 
@@ -20,7 +20,6 @@ enum COMPONENT_TYPE{
 struct component{
 	void *p_data;
 	int32_t m_id;
-	int32_t m_parent_tableidx;
 };
 
 struct component_table{
@@ -31,11 +30,8 @@ struct component_table_entry{
 	struct component *p_entry;
 };
 
-enum ERRCODE init_component_table(int32_t capacity);
-void ensure_component_table_has_entry(int32_t entity_idx, enum COMPONENT_TYPE type);
-struct component *create_component(int32_t parent, void *data, enum COMPONENT_TYPE type);
+enum ERRCODE      C_init          (int32_t i_worldID, int32_t i_capacity);
+void              C_ensureHasEntry(int32_t i_worldID, int32_t i_entityIdx, enum COMPONENT_TYPE e_type);
+struct component *C_create        (int32_t i_worldID, int32_t i_entityIdx, void *data, enum COMPONENT_TYPE e_type);
 
-extern struct component_table **g_componenttable;
-extern int32_t g_componenttable_capacity;
-
-#endif /* COMPONENT_H_ */
+#endif /* ECS_COMPONENT_H_ */

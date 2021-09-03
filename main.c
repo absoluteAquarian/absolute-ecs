@@ -5,15 +5,28 @@
 #include "component.h"
 #include "entity.h"
 #include "utility.h"
+#include "world.h"
 
 int main(int argc, char** argv){
-	int32_t obj_idx = create_entity();
-	struct entity *ent = *(g_entitytable + obj_idx);
+	/* Create the default world */
+#ifdef DEBUG_INFO
+	puts("Creating default world...");
+#endif
+	W_create();
 	
+#ifdef DEBUG_INFO
+	puts("Creating entity...");
+#endif
+	int32_t obj_idx = E_create(g_defaultWorld->p_meta->m_id);
+	struct entity *ent = *(g_defaultWorld->p_entityTable + obj_idx);
+	
+#ifdef DEBUG_INFO
+	puts("Creating first component...");
+#endif
 	char *name = "Hello, World!";
-	ent->vtable->set_component(ent, create_component(obj_idx, name, COMPONENT_STRING));
+	E_setComponent(ent, C_create(g_defaultWorld->p_meta->m_id, obj_idx, name, COMPONENT_STRING));
 	
-	struct component *data = ent->vtable->get_component(ent, COMPONENT_STRING);
+	struct component *data = E_getComponent(ent, COMPONENT_STRING);
 	
 	if(data){
 		char* str = data->p_data;
@@ -21,10 +34,13 @@ int main(int argc, char** argv){
 	}else
 		puts(STRINGIFY(COMPONENT_STRING) " component was not registered");
 	
+#ifdef DEBUG_INFO
+	puts("Creating second component...");
+#endif
 	int value = 26;
-	ent->vtable->set_component(ent, create_component(obj_idx, &value, COMPONENT_INT32));
+	E_setComponent(ent, C_create(g_defaultWorld->p_meta->m_id, obj_idx, &value, COMPONENT_INT32));
 	
-	data = ent->vtable->get_component(ent, COMPONENT_INT32);
+	data = E_getComponent(ent, COMPONENT_INT32);
 	
 	if(data){
 		int* valuePtr = data->p_data;
@@ -32,12 +48,11 @@ int main(int argc, char** argv){
 	}else
 		puts(STRINGIFY(COMPONENT_INT32) " component was not registered");
 	
-	destroy_entity(ent);
+	E_destroy(ent);
 	
 	fflush(stdout);
 	
-	free(g_entitytable);
-	free(g_componenttable);
+	free(g_worlds);
 	
 	return 0;
 }
