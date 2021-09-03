@@ -50,16 +50,19 @@ enum ERRCODE init_component_table(int32_t capacity){
 	return RESULT_OK;
 }
 
-void ensure_component_table_has_entry(int32_t entity_idx){
+void ensure_component_table_has_entry(int32_t entity_idx, enum COMPONENT_TYPE type){
 	if(!g_componenttable)
 		log_err_lf(RESULT_COMPONENT_TABLE_UNINITIALIZED);
 	
-	/* Create a new entry for the entity if it doesn't exist already */
-	if(!g_componenttable[entity_idx])
-		g_componenttable[entity_idx] = malloc_debug(sizeof *g_componenttable);
+	/* Ensure the component table has enough room here */
+	init_component_table(entity_idx);
 	
-	if(!g_componenttable[entity_idx]->p_components)
-		g_componenttable[entity_idx]->p_components = malloc_debug(sizeof *g_componenttable[entity_idx]->p_components * COMPONENT_COUNT);
+	/* Create a new entry for the entity if it doesn't exist already */
+	ENSURE_ALLOC(g_componenttable[entity_idx], 1);
+	
+	ENSURE_ALLOC(g_componenttable[entity_idx]->p_components, COMPONENT_COUNT);
+	
+	ENSURE_ALLOC(g_componenttable[entity_idx]->p_components[type], 1);
 }
 
 struct component *create_component(int32_t parent, void *data, enum COMPONENT_TYPE type){
@@ -90,7 +93,7 @@ struct component *create_component(int32_t parent, void *data, enum COMPONENT_TY
 		log_err_lf(errcode);
 	}
 	
-	ensure_component_table_has_entry(obj->m_tableidx);
+	ensure_component_table_has_entry(obj->m_tableidx, type);
 	
 	/* Create the component */
 	struct component *c_obj = malloc_debug(sizeof *c_obj);

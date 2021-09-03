@@ -32,7 +32,7 @@ struct component_table_entry{
 };
 
 enum ERRCODE init_component_table(int32_t capacity);
-void ensure_component_table_has_entry(int32_t entity_idx);
+void ensure_component_table_has_entry(int32_t entity_idx, enum COMPONENT_TYPE type);
 struct component *create_component(int32_t parent, void *data, enum COMPONENT_TYPE type);
 
 extern struct component_table **g_componenttable;

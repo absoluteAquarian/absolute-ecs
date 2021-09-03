@@ -10,6 +10,9 @@
 #define OFFSETOF(TYPE, ELEMENT) ((size_t)&(((TYPE*)0)->ELEMENT))
 
 #define REPORT_ADDR(x) do{ printf("ADDRESS FOR VALUE \"" STRINGIFY(x) "\": 0x%08x\n", &x); }while(0)
+	
+#define ALLOC(VALUE, SCALAR) VALUE = malloc_debug(sizeof *VALUE * (SCALAR))
+#define ENSURE_ALLOC(VALUE, SCALAR) do{ if(!VALUE) ALLOC(VALUE, SCALAR); }while(0)
 
 extern size_t g_totalalloc;
 

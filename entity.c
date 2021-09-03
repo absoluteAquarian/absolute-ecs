@@ -131,7 +131,7 @@ void entity_set_component(struct entity *obj, struct component *data){
 	if(obj->m_destroyed)
 		log_err_lf(RESULT_ENTITY_DESTROYED);
 	
-	ensure_component_table_has_entry(obj->m_tableidx);
+	ensure_component_table_has_entry(obj->m_tableidx, data->m_id);
 	
 	g_componenttable[obj->m_tableidx]->p_components[data->m_id]->p_entry = data;
 }
