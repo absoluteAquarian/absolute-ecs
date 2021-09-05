@@ -47,7 +47,8 @@ void S_printingSystem_Update(struct system_base *p_system, int32_t i_worldIdx, i
 		"\n  World #%d"
 		"\n  Entity #%d"
 		"\n  " STRINGIFY(COMPONENT_STRING) ": %s"
-		"\n  " STRINGIFY(COMPONENT_INT32) ": %d",
+		"\n  " STRINGIFY(COMPONENT_INT32) ": %d"
+		"\n",
 		p_print->p_name,
 		i_worldIdx,
 		i_entityIdx,

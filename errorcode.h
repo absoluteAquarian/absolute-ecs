@@ -36,7 +36,7 @@ enum MEMCODE{
 	/* Used by Microsoft's debug HeapAlloc() to mark "no man's land" guard bytes after allocated heap memory. */
 	MEM_MALLOC_HEAP_GUARD = 0xabababab,
 	/* "Bad food", Used by Microsoft's debug HeapAlloc() to mark uninitialized allocated heap memory */
-	MEM_MALLOC_UNALLOCATED = 0xbaadf00d,
+	MEM_MALLOC_UNINITIALIZED = 0xbaadf00d,
 	/* Used by Microsoft's C++ debugging runtime library and many DOS environments to mark uninitialized stack memory.
 	   'CC' resembles the opcode of the INT 3 debug breakpoint interrupt on x86 processors. */
 	MEM_STACK_UNITIALIZED = 0xcccccccc,

@@ -90,6 +90,25 @@ void C_ensureHasEntry(int32_t i_worldIdx, int32_t i_entityIdx, int32_t e_type){
 	if(!p_world->p_componentTable)
 		log_err_lf(RESULT_COMPONENT_TABLE_UNINITIALIZED);
 	
+	if(e_type >= C_getComponentCount()){
+		int32_t oldCount = g_componentCount;
+		g_componentCount = e_type + 1;
+		
+		/* Resize the component tables of all entities */
+		for(int i = 0; i < p_world->m_etCapacity; i++){
+			if(!p_world->p_entityTable[i] || !p_world->p_entityTable[i]->p_meta || p_world->p_entityTable[i]->p_meta->m_destroyed || !p_world->p_componentTable[i])
+				continue;
+			
+			struct component_table_entry **table = p_world->p_componentTable[i]->p_components;
+			ALLOC(p_world->p_componentTable[i]->p_components, C_getComponentCount());
+			
+			if(oldCount >= 0)
+				memcpy(p_world->p_componentTable[i]->p_components, table, sizeof *p_world->p_componentTable[i]->p_components * oldCount);
+			
+			free_debug(table, sizeof *p_world->p_componentTable[i]->p_components * oldCount);
+		}
+	}
+	
 	/* Ensure the component table has enough room here */
 	C_init(i_worldIdx, e_type);
 	
@@ -143,25 +162,6 @@ DLL_SYMBOL struct component *C_create(int32_t i_worldIdx, int32_t i_entityIdx, v
 	if(obj->m_tableIdx >= p_world->m_ctCapacity){
 		errcode = C_init(i_worldIdx, obj->m_tableIdx + 1);
 		log_err_lf(errcode);
-	}
-	
-	if(e_type >= C_getComponentCount()){
-		int32_t oldCount = g_componentCount;
-		g_componentCount = e_type + 1;
-		
-		/* Resize the component tables of all entities */
-		for(int i = 0; i < p_world->m_etCapacity; i++){
-			if(!p_world->p_entityTable[i] || !p_world->p_entityTable[i]->p_meta || p_world->p_entityTable[i]->p_meta->m_destroyed || !p_world->p_componentTable[i_entityIdx])
-				continue;
-			
-			struct component_table_entry **table = p_world->p_componentTable[i_entityIdx]->p_components;
-			ALLOC(p_world->p_componentTable[i_entityIdx]->p_components, C_getComponentCount());
-			
-			if(oldCount >= 0)
-				memcpy(p_world->p_componentTable[i_entityIdx]->p_components, table, sizeof *p_world->p_componentTable[i_entityIdx]->p_components * (oldCount + 1));
-			
-			free_debug(table, sizeof *p_world->p_componentTable[i_entityIdx]->p_components * oldCount);
-		}
 	}
 	
 	C_ensureHasEntry(i_worldIdx, obj->m_tableIdx, e_type);

@@ -199,6 +199,8 @@ DLL_SYMBOL bool E_hasComponent(struct entity *obj, int32_t type){
 	if(!g_worlds[worldIdx])
 		log_err_lf(RESULT_NULL_WORLD);
 	
+	C_ensureHasEntry(worldIdx, obj->m_tableIdx, type);
+	
 	if(!g_worlds[worldIdx]->p_componentTable || !g_worlds[worldIdx]->p_componentTable[obj->m_tableIdx])
 		log_err_lf(RESULT_COMPONENT_TABLE_UNINITIALIZED);
 	
@@ -221,12 +223,14 @@ DLL_SYMBOL struct component* E_getComponent(struct entity *obj, int32_t type){
 	if(type < 0)
 		log_err_lf(RESULT_INVALID_COMPONENT_TYPE);
 	
-	if(!E_hasComponent(obj, type))
-		return NULL;
-	
 	int32_t worldIdx = W_findEntityParentWorld(obj);
 	if(worldIdx < 0)
 		log_err_lf(RESULT_ENTITY_NOT_BOUND_TO_WORLD);
+	
+	C_ensureHasEntry(worldIdx, obj->m_tableIdx, type);
+	
+	if(!E_hasComponent(obj, type))
+		return NULL;
 	
 	return g_worlds[worldIdx]->p_componentTable[obj->m_tableIdx]->p_components[type]->p_entry;
 }
@@ -255,6 +259,8 @@ DLL_SYMBOL int32_t *E_getComponents(struct entity *obj, int32_t* numComponents){
 	int nextIdx = 0;
 	int32_t* arr = malloc_debug(sizeof(int32_t) * p_world->m_ctCapacity);
 	for(int i = 0; i < p_world->m_ctCapacity; i++){
+		C_ensureHasEntry(worldIdx, obj->m_tableIdx, i);
+		
 		if(E_hasComponent(obj, i)){
 			*(arr + nextIdx) = i;
 			nextIdx++;

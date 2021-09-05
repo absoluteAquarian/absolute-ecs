@@ -1,7 +1,7 @@
 LIBS    = -lm
 CC      = gcc
 FLAGS   = -g -Wall -ggdb
-DFLAGS  = -g -Wall -ggdb -D BUILD_DLL -shared
+DFLAGS  = -g -Wall -ggdb -shared -D BUILD_DLL
 BIN     = ./bin
 OBJ     = ./obj
 FILE    = main

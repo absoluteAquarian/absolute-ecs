@@ -6,6 +6,7 @@
 #include <string.h>
 
 #include "core.h"
+#include "errorcode.h"
 
 #define STRINGIFY(x) #x
 #define STRINGIFY_VALUE(x) STRINGIFY(x)
@@ -20,7 +21,7 @@
 	}while(0)
 
 #define ENSURE_ALLOC(VALUE, SCALAR) do{ \
-		if(!(VALUE)){ \
+		if(!(VALUE) || (VALUE) == (void*)MEM_MALLOC_HEAP_GUARD || (VALUE) == (void*)MEM_MALLOC_UNINITIALIZED){ \
 			VALUE = malloc_debug(sizeof *(VALUE) * (SCALAR)); \
 			memset(VALUE, 0, sizeof *(VALUE) * (SCALAR)); \
 		} \

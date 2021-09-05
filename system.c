@@ -222,15 +222,14 @@ bool S_validEntity(struct system_base *p_system, int32_t i_worldIdx, int32_t i_e
 		for(int i = 0; i < numComponents; i++){
 			struct component* p_component = E_getComponent(obj, *(components + i));
 			
-			if(p_component && p_component->m_id == *(components + i)){
+			/* E_getComponent returns NULL if the entity doesn't have the component */
+			if(p_component){
 				matchedComponents++;
 				
 				if(matchedComponents == p_system->m_validTypesCount){
 					free_debug(components, sizeof(int32_t) * numComponents);
 					return true;
 				}
-				
-				break;
 			}
 		}
 	
