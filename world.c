@@ -4,14 +4,15 @@
 #include <string.h>
 
 #include "component.h"
+#include "core.h"
 #include "entity.h"
 #include "errorcode.h"
 #include "utility.h"
 #include "world.h"
 
 struct world **g_worlds;
-int32_t g_worldCount;
-struct world *g_defaultWorld;
+int32_t        g_worldCount;
+struct world  *g_defaultWorld;
 
 enum ERRCODE W_init(int32_t capacity){
 	if(capacity <= 0)
@@ -54,7 +55,7 @@ int32_t W_findFreeIndex(){
 	return -1;
 };
 
-int32_t W_create(){
+DLL_SYMBOL int32_t W_create(){
 	static int nextID = 0;
 	enum ERRCODE errcode;
 	
@@ -107,7 +108,7 @@ int32_t W_create(){
 	return freeIdx;
 };
 
-enum ERRCODE W_destroy(struct world *p_world){
+DLL_SYMBOL enum ERRCODE W_destroy(struct world *p_world){
 	if(!p_world)
 		return RESULT_NULL_WORLD;
 	
@@ -124,11 +125,14 @@ enum ERRCODE W_destroy(struct world *p_world){
 	return RESULT_OK;
 }
 
-bool W_hasEntity(struct world *p_world, int32_t i_entityID, int32_t* p_entityIdx){
+DLL_SYMBOL bool W_hasEntity(struct world *p_world, int32_t i_entityID, int32_t* p_entityIdx){
 	if(!p_world)
 		log_err_lf(RESULT_WORLD_UNINITIALIZED);
 	
 	struct entity **p_worldEntityTable = p_world->p_entityTable;
+	if(!p_worldEntityTable)
+		log_err_lf(RESULT_ENTITY_TABLE_UNINITIALIZED);
+	
 	for(int e = 0; e < p_world->m_etCapacity; e++, p_worldEntityTable++){
 		if(p_worldEntityTable && !(*p_worldEntityTable)->p_meta->m_destroyed && (*p_worldEntityTable)->p_meta->m_id == i_entityID){
 			*p_entityIdx = (*p_worldEntityTable)->m_tableIdx;
@@ -140,7 +144,29 @@ bool W_hasEntity(struct world *p_world, int32_t i_entityID, int32_t* p_entityIdx
 	return false;
 }
 
-int32_t W_findEntityParentWorld(struct entity *p_entity){
+DLL_SYMBOL bool W_hasSystem(struct world *p_world, int32_t i_systemID, int32_t *p_systemIdx){
+	if(!p_world)
+		log_err_lf(RESULT_WORLD_UNINITIALIZED);
+	
+	struct system_base **p_worldSystemTable = p_world->p_systemTable;
+	if(!p_worldSystemTable)
+		log_err_lf(RESULT_SYSTEM_TABLE_UNINITIALIZED);
+	
+	for(int s = 0; s < p_world->m_stCapacity; s++, p_worldSystemTable++){
+		if(p_worldSystemTable && !(*p_worldSystemTable)->p_meta)
+			log_err_lf(RESULT_NULL_METADATA);
+		
+		if(p_worldSystemTable && !(*p_worldSystemTable)->p_meta->m_destroyed && (*p_worldSystemTable)->p_meta->m_id == i_systemID){
+			*p_systemIdx = (*p_worldSystemTable)->m_tableIdx;
+			return true;
+		}
+	}
+	
+	*p_systemIdx = -1;
+	return false;
+}
+
+DLL_SYMBOL int32_t W_findEntityParentWorld(struct entity *p_entity){
 	if(!p_entity)
 		log_err_lf(RESULT_NULL_WORLD);
 	

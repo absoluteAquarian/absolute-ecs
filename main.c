@@ -1,18 +1,39 @@
+#ifndef BUILD_DLL
+
 #include <stdio.h>
 #include <stdint.h>
 
-#include "errorcode.h"
 #include "component.h"
+#include "core.h"
+#include "engine.h"
 #include "entity.h"
+#include "errorcode.h"
+#include "system.h"
 #include "utility.h"
 #include "world.h"
 
+void absolute_ecs_init();
+void absolute_ecs_run();
+void create_entities();
+
 int main(int argc, char** argv){
-	/* Create the default world */
-#ifdef DEBUG_INFO
-	puts("Creating default world...");
-#endif
-	W_create();
+	AECS_Init();
+	
+	create_entities();
+	
+	AECS_Run();
+	
+	/* Delete the first entity */
+	E_destroy(*g_defaultWorld->p_entityTable);
+	
+	fflush(stdout);
+	
+	free_debug(g_worlds, sizeof *g_worlds * g_worldCount);
+	
+	return 0;
+}
+
+void create_entities(){
 	
 #ifdef DEBUG_INFO
 	puts("Creating entity...");
@@ -24,35 +45,13 @@ int main(int argc, char** argv){
 	puts("Creating first component...");
 #endif
 	char *name = "Hello, World!";
-	E_setComponent(ent, C_create(g_defaultWorld->p_meta->m_id, obj_idx, name, COMPONENT_STRING));
-	
-	struct component *data = E_getComponent(ent, COMPONENT_STRING);
-	
-	if(data){
-		char* str = data->p_data;
-		printf("component data: %s\n", str);
-	}else
-		puts(STRINGIFY(COMPONENT_STRING) " component was not registered");
+	E_setComponent(ent, C_create(g_defaultWorld->m_tableIdx, obj_idx, name, COMPONENT_STRING));
 	
 #ifdef DEBUG_INFO
 	puts("Creating second component...");
 #endif
 	int value = 26;
-	E_setComponent(ent, C_create(g_defaultWorld->p_meta->m_id, obj_idx, &value, COMPONENT_INT32));
-	
-	data = E_getComponent(ent, COMPONENT_INT32);
-	
-	if(data){
-		int* valuePtr = data->p_data;
-		printf("component data: %d\n", *valuePtr);
-	}else
-		puts(STRINGIFY(COMPONENT_INT32) " component was not registered");
-	
-	E_destroy(ent);
-	
-	fflush(stdout);
-	
-	free(g_worlds);
-	
-	return 0;
+	E_setComponent(ent, C_create(g_defaultWorld->m_tableIdx, obj_idx, &value, COMPONENT_INT32));
 }
+
+#endif /* BUILD_DLL */

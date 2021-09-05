@@ -3,6 +3,9 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+
+#include "core.h"
 
 #define STRINGIFY(x) #x
 #define STRINGIFY_VALUE(x) STRINGIFY(x)
@@ -23,9 +26,21 @@
 		} \
 	}while(0)
 
+#define ALLOC_DIRECT(VALUE, SIZE) do{ \
+		VALUE = malloc_debug(SIZE); \
+		memset(VALUE, 0, (SIZE)); \
+	}while(0)
+
+#define ENSURE_ALLOC_DIRECT(VALUE, SIZE) do{ \
+		if(!(VALUE)){ \
+			VALUE = malloc_debug(SIZE); \
+			memset(VALUE, 0, (SIZE)); \
+		} \
+	}while(0)
+
 extern size_t g_totalalloc;
 
-void *malloc_debug(size_t size);
-void free_debug(void *ptr, size_t size);
+DLL_SYMBOL void *malloc_debug(size_t size);
+DLL_SYMBOL void free_debug   (void *ptr, size_t size);
 
 #endif /* UTILITY_H_ */

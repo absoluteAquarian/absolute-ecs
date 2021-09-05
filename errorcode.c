@@ -3,9 +3,10 @@
 #include <stdlib.h>
 #include <inttypes.h>
 
+#include "core.h"
 #include "errorcode.h"
 
-void log_err(enum ERRCODE errcode, int64_t line, const char* file){
+DLL_SYMBOL void log_err(enum ERRCODE errcode, int64_t line, const char* file){
 	switch(errcode){
 		case RESULT_OK:
 			/* don't print anything nor exit */
@@ -52,13 +53,28 @@ void log_err(enum ERRCODE errcode, int64_t line, const char* file){
 		case RESULT_NULL_WORLD:
 			fprintf(stderr, "ERROR: Attempted to perform an action on an unitialized world");
 			break;
+		case RESULT_NULL_SYSTEM:
+			fprintf(stderr, "ERROR: Attempted to perform an action on an uninitialized system");
+			break;
+		case RESULT_SYSTEM_UNINTIALIZED:
+			fprintf(stderr, "ERROR: System has not been initialized");
+			break;
+		case RESULT_SYSTEM_TABLE_UNINITIALIZED:
+			fprintf(stderr, "ERROR: System table has not been initialized");
+			break;
+		case RESULT_INIT_SYSTEM_TABLE_CAPACITY:
+			fprintf(stderr, "ERROR: Requested system table capacity was zero or negative");
+			break;
+		case RESULT_NOT_REGISTERED_SYSTEM_TYPE:
+			fprintf(stderr, "ERROR: System type could not be found");
+			break;
 		default:
 			fprintf(stderr, "ERROR: unknown error code (%d)\n", (int32_t)errcode);
 			exit(-1);
 			break;
 	}
 	
-	fprintf(stderr, "\n  at file \"%s\" on line %d\n" PRId64, file, line);
+	fprintf(stderr, "\n  at file \"%s\" on line %" PRId64 "\n", file, line);
 	
 	exit((int32_t)errcode);
 }

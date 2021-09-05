@@ -5,27 +5,28 @@
 
 #include "entity.h"
 #include "component.h"
+#include "core.h"
 #include "errorcode.h"
 #include "utility.h"
 #include "world.h"
 
-enum ERRCODE E_init(int32_t i_worldID, int32_t capacity){
+enum ERRCODE E_init(int32_t i_worldIdx, int32_t capacity){
 	if(capacity <= 0)
 		return RESULT_INIT_ENTITY_TABLE_CAPACITY;
 	
 	if(!g_worlds)
 		log_err_lf(RESULT_WORLD_TABLE_UNINITIALIZED);
 	
-	if(i_worldID < 0 || i_worldID >= g_worldCount)
+	if(i_worldIdx < 0 || i_worldIdx >= g_worldCount)
 		return RESULT_WORLD_INVALID_INDEX;
 	
-	struct world *p_world = g_worlds[i_worldID];
+	struct world *p_world = g_worlds[i_worldIdx];
 	
 	if(!p_world)
 		return RESULT_NULL_WORLD;
 	
 #ifdef DEBUG_INFO
-	printf("Initializing/resizing entity table for world %d to capacity %d...\n", i_worldID, capacity);
+	printf("Initializing/resizing entity table for world %d to capacity %d...\n", i_worldIdx, capacity);
 #endif
 	
 	if(!p_world->p_entityTable || !p_world->m_etCapacity){
@@ -66,14 +67,14 @@ enum ERRCODE E_init(int32_t i_worldID, int32_t capacity){
 	return RESULT_OK;
 }
 
-int32_t E_findFreeIndex(int32_t i_worldID){
+int32_t E_findFreeIndex(int32_t i_worldIdx){
 	if(!g_worlds)
 		log_err_lf(RESULT_WORLD_TABLE_UNINITIALIZED);
 	
-	if(i_worldID < 0 || i_worldID >= g_worldCount)
+	if(i_worldIdx < 0 || i_worldIdx >= g_worldCount)
 		return RESULT_WORLD_INVALID_INDEX;
 	
-	struct world *p_world = g_worlds[i_worldID];
+	struct world *p_world = g_worlds[i_worldIdx];
 	
 	if(!p_world->p_entityTable)
 		log_err_lf(RESULT_ENTITY_TABLE_UNINITIALIZED);
@@ -90,27 +91,27 @@ int32_t E_findFreeIndex(int32_t i_worldID){
 	return -1;
 }
 
-int32_t E_create(int32_t i_worldID){
+DLL_SYMBOL int32_t E_create(int32_t i_worldIdx){
 	static int nextID = 0;
 	enum ERRCODE errcode;
 	
 	if(!g_worlds)
 		log_err_lf(RESULT_WORLD_TABLE_UNINITIALIZED);
 	
-	if(i_worldID < 0 || i_worldID >= g_worldCount)
+	if(i_worldIdx < 0 || i_worldIdx >= g_worldCount)
 		log_err_lf(RESULT_WORLD_INVALID_INDEX);
 	
-	struct world *p_world = g_worlds[i_worldID];
+	struct world *p_world = g_worlds[i_worldIdx];
 	
 	if(!p_world)
 		log_err_lf(RESULT_NULL_WORLD);
 	
 #ifdef DEBUG_INFO
-	printf("Ensuring entity table for world %d is initialized...\n", i_worldID);
+	printf("Ensuring entity table for world %d is initialized...\n", i_worldIdx);
 #endif
 	
 	if(!p_world->p_entityTable || !p_world->m_etCapacity){
-		errcode = E_init(i_worldID, 8);
+		errcode = E_init(i_worldIdx, 8);
 		log_err_lf(errcode);
 	}
 	
@@ -118,11 +119,11 @@ int32_t E_create(int32_t i_worldID){
 	puts("Finding free index to use for this entity...");
 #endif
 	
-	int32_t free_idx = E_findFreeIndex(i_worldID);
+	int32_t free_idx = E_findFreeIndex(i_worldIdx);
 	if(free_idx < 0){
 		/* Allocate more space */
 		free_idx = p_world->m_etCapacity;
-		errcode = E_init(i_worldID, p_world->m_etCapacity + 1);
+		errcode = E_init(i_worldIdx, p_world->m_etCapacity + 1);
 		log_err_lf(errcode);
 	}
 #ifdef DEBUG_INFO
@@ -155,7 +156,7 @@ int32_t E_create(int32_t i_worldID){
 	return free_idx;
 }
 
-enum ERRCODE E_destroy(struct entity *obj){
+DLL_SYMBOL enum ERRCODE E_destroy(struct entity *obj){
 	if(!obj)
 		return RESULT_NULL_ENTITY;
 	
@@ -175,7 +176,7 @@ enum ERRCODE E_destroy(struct entity *obj){
 	return RESULT_OK;
 }
 
-bool E_hasComponent(struct entity *obj, enum COMPONENT_TYPE type){
+DLL_SYMBOL bool E_hasComponent(struct entity *obj, int32_t type){
 	if(!obj)
 		log_err_lf(RESULT_NULL_ENTITY);
 	
@@ -187,15 +188,24 @@ bool E_hasComponent(struct entity *obj, enum COMPONENT_TYPE type){
 	
 	if(!g_worlds)
 		log_err_lf(RESULT_WORLD_TABLE_UNINITIALIZED);
+	
+	if(type < 0)
+		log_err_lf(RESULT_INVALID_COMPONENT_TYPE);
 	
 	int32_t worldIdx = W_findEntityParentWorld(obj);
 	if(worldIdx < 0)
 		log_err_lf(RESULT_ENTITY_NOT_BOUND_TO_WORLD);
 	
+	if(!g_worlds[worldIdx])
+		log_err_lf(RESULT_NULL_WORLD);
+	
+	if(!g_worlds[worldIdx]->p_componentTable || !g_worlds[worldIdx]->p_componentTable[obj->m_tableIdx])
+		log_err_lf(RESULT_COMPONENT_TABLE_UNINITIALIZED);
+	
 	return g_worlds[worldIdx]->p_componentTable[obj->m_tableIdx]->p_components[type]->p_entry != NULL;
 }
 
-struct component* E_getComponent(struct entity *obj, enum COMPONENT_TYPE type){
+DLL_SYMBOL struct component* E_getComponent(struct entity *obj, int32_t type){
 	if(!obj)
 		log_err_lf(RESULT_NULL_ENTITY);
 	
@@ -207,6 +217,9 @@ struct component* E_getComponent(struct entity *obj, enum COMPONENT_TYPE type){
 	
 	if(!g_worlds)
 		log_err_lf(RESULT_WORLD_TABLE_UNINITIALIZED);
+	
+	if(type < 0)
+		log_err_lf(RESULT_INVALID_COMPONENT_TYPE);
 	
 	if(!E_hasComponent(obj, type))
 		return NULL;
@@ -218,7 +231,50 @@ struct component* E_getComponent(struct entity *obj, enum COMPONENT_TYPE type){
 	return g_worlds[worldIdx]->p_componentTable[obj->m_tableIdx]->p_components[type]->p_entry;
 }
 
-void E_setComponent(struct entity *obj, struct component *data){
+DLL_SYMBOL int32_t *E_getComponents(struct entity *obj, int32_t* numComponents){
+	*numComponents = 0;
+	
+	if(!obj)
+		log_err_lf(RESULT_NULL_ENTITY);
+	
+	if(!obj->p_meta)
+		log_err_lf(RESULT_NULL_METADATA);
+	
+	if(obj->p_meta->m_destroyed)
+		log_err_lf(RESULT_ENTITY_DESTROYED);
+	
+	if(!g_worlds)
+		log_err_lf(RESULT_WORLD_TABLE_UNINITIALIZED);
+	
+	int32_t worldIdx = W_findEntityParentWorld(obj);
+	if(worldIdx < 0)
+		log_err_lf(RESULT_ENTITY_NOT_BOUND_TO_WORLD);
+	
+	struct world *p_world = g_worlds[worldIdx];
+	
+	int nextIdx = 0;
+	int32_t* arr = malloc_debug(sizeof(int32_t) * p_world->m_ctCapacity);
+	for(int i = 0; i < p_world->m_ctCapacity; i++){
+		if(E_hasComponent(obj, i)){
+			*(arr + nextIdx) = i;
+			nextIdx++;
+		}
+	}
+	
+	if(!nextIdx)
+		return NULL;
+	
+	int32_t *ret = malloc_debug(sizeof(int32_t) * nextIdx);
+	memcpy(ret, arr, sizeof(int32_t) * nextIdx);
+	
+	free_debug(arr, sizeof(int) * p_world->m_ctCapacity);
+	
+	*numComponents = nextIdx;
+	
+	return ret;
+}
+
+DLL_SYMBOL void E_setComponent(struct entity *obj, struct component *data){
 	if(!obj)
 		log_err_lf(RESULT_NULL_ENTITY);
 	
