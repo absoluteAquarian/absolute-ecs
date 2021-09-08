@@ -51,7 +51,7 @@ DLL_SYMBOL void AECS_Deinit(){
 				continue;
 			
 			for(int32_t cc = 0; cc < g_componentCount; cc++){
-				struct component_table_entry *p_cTableEntry = p_cTable[cc];
+				struct component_table_entry *p_cTableEntry = p_cTable->p_components[cc];
 				
 				if(!p_cTableEntry || !p_cTableEntry->p_entry)
 					continue;
@@ -88,7 +88,7 @@ DLL_SYMBOL void AECS_Deinit(){
 		free_debug(p_world->p_entityTable, sizeof *p_world->p_entityTable * p_world->m_etCapacity);
 		
 		/* Free the data for all systems */
-		for(int32_t s = 0; s < p_world->stCapacity; s++){
+		for(int32_t s = 0; s < p_world->m_stCapacity; s++){
 			struct system_base *p_system = p_world->p_systemTable[s];
 			
 			if(!p_system)

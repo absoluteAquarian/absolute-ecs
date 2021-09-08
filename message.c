@@ -14,7 +14,7 @@ DLL_SYMBOL struct message *M_create(int32_t i_srcSystem, int32_t i_destSystem, v
 	
 	msg->p_data->p_content = p_data;
 	msg->p_data->p_typeName = p_typeName;
-	ALLOC(msg->vtable);
+	ALLOC(msg->vtable, 1);
 	
 	return msg;
 }

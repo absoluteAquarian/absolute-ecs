@@ -10,7 +10,7 @@
 #include "world.h"
 
 struct system_base *g_systemStart;
-extern size_t      *g_systemSizes;
+size_t             *g_systemSizes;
 
 enum ERRCODE S_init(int32_t i_worldIdx, int32_t i_capacity){
 	if(i_capacity <= 0)
