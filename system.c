@@ -10,6 +10,7 @@
 #include "world.h"
 
 struct system_base *g_systemStart;
+extern size_t      *g_systemSizes;
 
 enum ERRCODE S_init(int32_t i_worldIdx, int32_t i_capacity){
 	if(i_capacity <= 0)
@@ -141,6 +142,8 @@ DLL_SYMBOL int32_t S_create(int32_t i_worldIdx, int32_t i_type, size_t s_allocSi
 	obj->p_meta->m_destroyed = false;
 	
 	*(p_world->p_systemTable + free_idx) = obj;
+	
+	*(g_systemSizes + free_idx) = s_allocSize;
 	
 	return free_idx;
 }

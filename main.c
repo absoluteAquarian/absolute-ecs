@@ -13,8 +13,6 @@
 #include "world.h"
 #include "systems/system_printing.h"
 
-void absolute_ecs_init();
-void absolute_ecs_run();
 void create_entities();
 void create_systems();
 void MAIN_systemSendMessages(struct system_base* p_system, int32_t i_worldIdx);
@@ -23,19 +21,20 @@ void MAIN_systemReadMessages(struct system_base* p_system, int32_t i_worldIdx);
 int component_val;
 
 int main(int argc, char** argv){
+	/* AECS_Init() creates the default world and initializes g_componentCount */
 	AECS_Init();
 	
 	create_entities();
 	create_systems();
 	
+	/* AECS_Run() iterates through all systems added by S_insert() */
 	AECS_Run();
 	
-	/* Delete the first entity */
-	E_destroy(*g_defaultWorld->p_entityTable);
-	
-	fflush(stdout);
-	
-	free_debug(g_worlds, sizeof *g_worlds * g_worldCount);
+	/* AECS_Deinit() frees all world data, which includes entities, components, systems and messages.
+	   HOWEVER: Data contained IN components and messages is not freed.  This is due to being unable
+	   To determine whether the pointer contained in them points to the heap or stack.  Users must
+	   free component and message data themselves.*/
+	AECS_Deinit();
 	
 	return 0;
 }
@@ -128,7 +127,7 @@ void MAIN_systemReadMessages(struct system_base* p_system, int32_t i_worldIdx){
 			log_err_lf(RESULT_INVALID_SYSTEM_INDEX);
 		
 		/* The only type of the messages sent is (char*), but caution should be used
-		   when reading messages to account for the proper type.*/
+		   when reading messages to account for the proper type. */
 		if(!strcmp(p_msg->p_data->p_typeName, "STRING")){
 			char* p_msg_content = (char*)p_msg->p_data->p_content;
 			

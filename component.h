@@ -9,6 +9,7 @@
 struct component;
 struct component_table;
 struct component_table_entry;
+struct component_vtable;
 
 /* The base "types" of components.  Feel free to add additional values with other enums or just integers */
 enum COMPONENT_TYPE{
@@ -30,8 +31,9 @@ enum COMPONENT_TYPE{
 };
 
 struct component{
-	int32_t m_id;
-	void *p_data;
+	int32_t                  m_id;
+	void                    *p_data;
+	struct component_vtable *vtable;
 };
 
 struct component_table{
@@ -40,6 +42,11 @@ struct component_table{
 
 struct component_table_entry{
 	struct component *p_entry;
+};
+
+struct component_vtable{
+	/* Called when the component is freed */
+	void (*onClear)(struct component *p_component);
 };
 
 /* How many component types exist by default */

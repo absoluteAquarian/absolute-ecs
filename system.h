@@ -51,6 +51,7 @@ struct system_vtable{
 };
 
 extern struct system_base *g_systemStart;
+extern size_t             *g_systemSizes;
 
 #ifndef BUILD_DLL
 /* System types implemented by the framework */

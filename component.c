@@ -174,6 +174,7 @@ DLL_SYMBOL struct component *C_create(int32_t i_worldIdx, int32_t i_entityIdx, v
 	struct component *c_obj = malloc_debug(sizeof *c_obj);
 	c_obj->p_data = data;
 	c_obj->m_id = e_type;
+	ALLOC(c_obj->vtable, 1);
 	
 	return c_obj;
 }
