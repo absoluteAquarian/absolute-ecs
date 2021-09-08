@@ -1,12 +1,20 @@
 LIBS    = -lm
 CC      = gcc
+# Flags for Windows/Linux executable (.exe) and Windows object (.o) compiling
 FLAGS   = -g -Wall -ggdb
-DFLAGS  = -g -Wall -ggdb -shared -D BUILD_DLL
+# Flags for Linux object (.o) compiling
+SFLAGS  = -g -Wall -ggdb -fPIC
+# Flags for Windows Dynamic Link Library (.dll) compiling
+DFLAGS  = -g -Wall -ggdb -D BUILD_DLL
+# Flags for Linux Shared Object library (.so) compiling
+SDFLAGS = -g -Wall -ggdb -shared -D BUILD_DLL
 BIN     = ./bin
 OBJ     = ./obj
 FILE    = main
 FILEPFX = $(BIN)/$(FILE).
+# The target file type
 TARGET  = exe
+# The target OS type
 TOS     = OS_WIN
 BUILD   = $(FILEPFX)$(TARGET)
 
@@ -24,7 +32,7 @@ OBJS   = $(subst ./,,$(patsubst %.c, $(OBJ)/%.o, $(SRCS)))
 # Ensures that paths containing spaces don't cause problems
 QOBJS  = $(wildcard %, "%", $(OBJS))
 
-# This part is supposed to build the executable
+# Build the executable (.exe), library (.dll) or Unix library (.so)
 $(BUILD): $(OBJ) $(BIN) $(OBJS)
 ifneq ($(TOS), OS_WIN)
 ifneq ($(TOS), OS_UNIX)
@@ -36,17 +44,28 @@ ifeq ($(TARGET), exe)
 	@rm -f "$(BIN)/main.dll"
 	$(CC) $(FLAGS) -D $(TOS) -o $@ $(QOBJS) $(LIBS)
 else ifeq ($(TARGET), dll)
+ifeq ($(TOS), OS_WIN)
 	@echo === BUILDING DLL ===
 	@rm -f "$(BIN)/main.exe"
 	$(CC) $(DFLAGS) -D $(TOS) -o $@ $(QOBJS) $(LIBS)
 else
+	@echo === BUILDING SO ===
+	@rm -f "$(BIN)/main.exe"
+	$(CC) $(SDFLAGS) -D $(TOS) -o $(basename $@).so $(QOBJS) $(LIBS)
+endif
+else
 	$(error Invalid target type.  Expected "TARGET=exe" or "Target=dll")
 endif
 
-# This part is supposed to build the object (.o) files
+# Build the object (.o) files
 $(OBJ)/%.o: %.c $(HEADS)
+ifeq ($(TARGET)$(TOS), dllOS_UNIX)
+	@if [ -n "$(dir $@)" ]; then mkdir -p "$(dir $@)"; fi
+	$(CC) $(SFLAGS) -D $(TOS) -c "$<" -o "$@"
+else
 	@if [ -n "$(dir $@)" ]; then mkdir -p "$(dir $@)"; fi
 	$(CC) $(FLAGS) -D $(TOS) -c "$<" -o "$@"
+endif
 
 $(OBJ) $(BIN):
 	@mkdir $@
