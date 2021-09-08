@@ -1,5 +1,5 @@
 #ifndef ECS_MESSAGE_H_
-#define ECS_MESSAGE_H_
+#define ECS_MESSAGE_H_ 1
 
 #include <stdint.h>
 

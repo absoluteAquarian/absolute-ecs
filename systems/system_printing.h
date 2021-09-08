@@ -1,7 +1,7 @@
 #ifndef BUILD_DLL
 
 #ifndef ECS_SYSTEMS_PRINTING_H_
-#define ECS_SYSTEMS_PRINTING_H_
+#define ECS_SYSTEMS_PRINTING_H_ 1
 
 #include <stdbool.h>
 #include <stdint.h>

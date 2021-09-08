@@ -1,5 +1,5 @@
 #ifndef ECS_COMPONENT_H_
-#define ECS_COMPONENT_H_
+#define ECS_COMPONENT_H_ 1
 
 #include <stdint.h>
 

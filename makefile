@@ -7,6 +7,7 @@ OBJ     = ./obj
 FILE    = main
 FILEPFX = $(BIN)/$(FILE).
 TARGET  = exe
+TOS     = OS_WIN
 BUILD   = $(FILEPFX)$(TARGET)
 
 .PHONY: default all clean
@@ -25,14 +26,19 @@ QOBJS  = $(wildcard %, "%", $(OBJS))
 
 # This part is supposed to build the executable
 $(BUILD): $(OBJ) $(BIN) $(OBJS)
+ifneq ($(TOS), OS_WIN)
+ifneq ($(TOS), OS_UNIX)
+$(error Invalid OS specified.  Expected "TOS=OS_WIN" or "TOS=OS_UNIX")
+endif
+endif
 ifeq ($(TARGET), exe)
 	@echo === BUILDING EXE ===
 	@rm -f "$(BIN)/main.dll"
-	$(CC) $(FLAGS) -o $@ $(QOBJS) $(LIBS)
+	$(CC) $(FLAGS) -D $(TOS) -o $@ $(QOBJS) $(LIBS)
 else ifeq ($(TARGET), dll)
 	@echo === BUILDING DLL ===
 	@rm -f "$(BIN)/main.exe"
-	$(CC) $(DFLAGS) -o $@ $(QOBJS) $(LIBS)
+	$(CC) $(DFLAGS) $(TOS) -o $@ $(QOBJS) $(LIBS)
 else
 	$(error Invalid target type.  Expected "TARGET=exe" or "Target=dll")
 endif
@@ -40,7 +46,7 @@ endif
 # This part is supposed to build the object (.o) files
 $(OBJ)/%.o: %.c $(HEADS)
 	@if [ -n "$(dir $@)" ]; then mkdir -p "$(dir $@)"; fi
-	$(CC) $(FLAGS) -c "$<" -o "$@"
+	$(CC) $(FLAGS) -D $(TOS) -c "$<" -o "$@"
 
 $(OBJ) $(BIN):
 	@mkdir $@

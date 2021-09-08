@@ -1,5 +1,5 @@
 #ifndef ECS_WORLD_H_
-#define ECS_WORLD_H_
+#define ECS_WORLD_H_ 1
 
 #include <stdbool.h>
 #include <stdint.h>

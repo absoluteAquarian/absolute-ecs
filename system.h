@@ -1,5 +1,5 @@
 #ifndef ECS_SYSTEM_H_
-#define ECS_SYSTEM_H_
+#define ECS_SYSTEM_H_ 1
 
 #include <stdbool.h>
 #include <stdint.h>

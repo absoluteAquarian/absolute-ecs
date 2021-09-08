@@ -1,5 +1,5 @@
 #ifndef UTILITY_H_
-#define UTILITY_H_
+#define UTILITY_H_ 1
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -42,6 +42,8 @@
 extern size_t g_totalalloc;
 
 DLL_SYMBOL void *malloc_debug(size_t size);
-DLL_SYMBOL void free_debug   (void *ptr, size_t size);
+DLL_SYMBOL void  free_debug  (void *ptr, size_t size);
+DLL_SYMBOL int   AECS_kbhit  ();
+DLL_SYMBOL char  AECS_getch  ();
 
 #endif /* UTILITY_H_ */

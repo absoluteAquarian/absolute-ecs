@@ -1,5 +1,5 @@
 #ifndef ERRORCODE_H_
-#define ERRORCODE_H_
+#define ERRORCODE_H_ 1
 
 #include <stdio.h>
 #include <stdlib.h>

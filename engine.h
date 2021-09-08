@@ -1,5 +1,5 @@
 #ifndef ENGINE_H_
-#define ENGINE_H_
+#define ENGINE_H_ 1
 
 #include "core.h"
 

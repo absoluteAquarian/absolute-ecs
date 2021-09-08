@@ -1,5 +1,5 @@
 #ifndef ECS_ENTITY_H_
-#define ECS_ENTITY_H_
+#define ECS_ENTITY_H_ 1
 
 #include <stdbool.h>
 #include <stdint.h>

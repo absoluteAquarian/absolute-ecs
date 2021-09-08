@@ -1,5 +1,5 @@
 #ifndef ECS_CORE_H_
-#define ECS_CORE_H_
+#define ECS_CORE_H_ 1
 
 #include <stdint.h>
 
