@@ -80,9 +80,9 @@ void UNIX_initTermios(int echo){
 	current.c_lflag &= ~ICANON;
 	
 	if(echo)
-	  current.c_lflag |= ECHO; /* Set to "echo" mode */
+		current.c_lflag |= ECHO; /* Set to "echo" mode */
 	else
-	  current.c_lflag &= ~ECHO; /* Set to "no echo" mode */
+		current.c_lflag &= ~ECHO; /* Set to "no echo" mode */
 	
 	/* Use these new terminal I/O settings now */
 	tcsetattr(0, TCSANOW, &current);
