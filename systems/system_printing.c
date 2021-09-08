@@ -1,3 +1,5 @@
+#ifndef BUILD_DLL
+
 #include <stdint.h>
 
 #include "../component.h"
@@ -55,3 +57,4 @@ void S_printingSystem_Update(struct system_base *p_system, int32_t i_worldIdx, i
 		(char*)E_getComponent(obj, COMPONENT_STRING)->p_data,
 		*(int*)E_getComponent(obj, COMPONENT_INT32)->p_data);
 }
+#endif /* BUILD_DLL */

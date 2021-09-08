@@ -52,6 +52,7 @@ struct system_vtable{
 
 extern struct system_base *g_systemStart;
 
+#ifndef BUILD_DLL
 /* System types implemented by the framework */
 enum SYSTEM_TYPES{
 	SYSTEM_PRINTING = 0,
@@ -60,6 +61,7 @@ enum SYSTEM_TYPES{
 	
 	SYSTEM_COUNT
 };
+#endif /* BUILD_DLL */
 
            enum ERRCODE S_init         (int32_t i_worldIdx, int32_t i_capacity);
            int32_t      S_findFreeIndex(int32_t i_worldIdx);
