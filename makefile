@@ -38,7 +38,7 @@ ifeq ($(TARGET), exe)
 else ifeq ($(TARGET), dll)
 	@echo === BUILDING DLL ===
 	@rm -f "$(BIN)/main.exe"
-	$(CC) $(DFLAGS) $(TOS) -o $@ $(QOBJS) $(LIBS)
+	$(CC) $(DFLAGS) -D $(TOS) -o $@ $(QOBJS) $(LIBS)
 else
 	$(error Invalid target type.  Expected "TARGET=exe" or "Target=dll")
 endif
