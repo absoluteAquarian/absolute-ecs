@@ -77,10 +77,10 @@ int32_t S_findFreeIndex(int32_t i_worldIdx){
 	struct world *p_world = g_worlds[i_worldIdx];
 	
 	if(!p_world->p_systemTable)
-		log_err_lf(RESULT_ENTITY_TABLE_UNINITIALIZED);
+		log_err_lf(RESULT_SYSTEM_TABLE_UNINITIALIZED);
 	
 	struct system_base **table = p_world->p_systemTable;
-	for(int i = 0; i < p_world->m_etCapacity; i++, table++){
+	for(int i = 0; i < p_world->m_stCapacity; i++, table++){
 		if(*table && !(*table)->p_meta)
 			log_err_lf(RESULT_NULL_METADATA);
 		
@@ -133,6 +133,8 @@ DLL_SYMBOL int32_t S_create(int32_t i_worldIdx, int32_t i_type, size_t s_allocSi
 	
 	ENSURE_ALLOC(obj->vtable, 1);
 	
+	ENSURE_ALLOC(obj->p_messages, 1);
+	
 	obj->m_tableIdx = free_idx;
 	
 	obj->p_meta->m_id = i_type;
@@ -172,6 +174,12 @@ void S_run(int32_t i_systemIdx, int32_t i_worldIdx){
 	if(!system->p_meta)
 		log_err_lf(RESULT_NULL_METADATA);
 	
+	if(system->p_meta->m_destroyed)
+		log_err_lf(RESULT_SYSTEM_DESTROYED);
+	
+	if(system->vtable->preUpdate)
+		system->vtable->preUpdate(system, i_worldIdx);
+	
 	/* Parse over every entity and check if the system can apply to it.  If it can, do so */
 	struct entity **p_worldEntityTable = p_world->p_entityTable;
 	for(int e = 0; e < p_world->m_etCapacity; e++, p_worldEntityTable++){
@@ -189,11 +197,20 @@ void S_run(int32_t i_systemIdx, int32_t i_worldIdx){
 		if(system->vtable->update && S_validEntity(system, i_worldIdx, p_entity->m_tableIdx))
 			system->vtable->update(system, i_worldIdx, p_entity->m_tableIdx);
 	}
+	
+	if(system->vtable->postUpdate)
+		system->vtable->postUpdate(system, i_worldIdx);
 }
 
 bool S_validEntity(struct system_base *p_system, int32_t i_worldIdx, int32_t i_entityIdx){
 	if(!p_system)
 		log_err_lf(RESULT_NULL_SYSTEM);
+	
+	if(!p_system->p_meta)
+		log_err_lf(RESULT_NULL_METADATA);
+	
+	if(p_system->p_meta->m_destroyed)
+		log_err_lf(RESULT_SYSTEM_DESTROYED);
 	
 	if(i_worldIdx < 0 || i_worldIdx >= g_worldCount)
 		log_err_lf(RESULT_WORLD_INVALID_INDEX);
@@ -218,17 +235,26 @@ bool S_validEntity(struct system_base *p_system, int32_t i_worldIdx, int32_t i_e
 	int32_t *components = E_getComponents(obj, &numComponents);
 	
 	/* components will be NULL if the entity does not have any components */
-	if(components){
+	if(components && numComponents >= p_system->m_validTypesCount && p_system->m_validTypesCount > 0){
 		for(int i = 0; i < numComponents; i++){
-			struct component* p_component = E_getComponent(obj, *(components + i));
+			struct component* p_component = E_getComponent(obj, components[i]);
 			
 			/* E_getComponent returns NULL if the entity doesn't have the component */
-			if(p_component){
-				matchedComponents++;
+			if(!p_component)
+				continue;
+			
+			for(int t = 0; t < p_system->m_validTypesCount; t++){
+				int32_t type = p_system->p_validTypes[t];
 				
-				if(matchedComponents == p_system->m_validTypesCount){
-					free_debug(components, sizeof(int32_t) * numComponents);
-					return true;
+				if(p_component->m_id == type){
+					matchedComponents++;
+					
+					if(matchedComponents == p_system->m_validTypesCount){
+						free_debug(components, sizeof(int32_t) * numComponents);
+						return true;
+					}
+					
+					break;
 				}
 			}
 		}
@@ -242,6 +268,12 @@ bool S_validEntity(struct system_base *p_system, int32_t i_worldIdx, int32_t i_e
 DLL_SYMBOL void S_insert(struct system_base *p_system, int32_t i_typeToSortAfter){
 	if(!p_system)
 		log_err_lf(RESULT_NULL_SYSTEM);
+	
+	if(!p_system->p_meta)
+		log_err_lf(RESULT_NULL_METADATA);
+	
+	if(p_system->p_meta->m_destroyed)
+		log_err_lf(RESULT_SYSTEM_DESTROYED);
 	
 	/* If the sorting list hasn't been declared yet, ignore i_typeToSortAfter */
 	if(!g_systemStart){
@@ -276,4 +308,57 @@ DLL_SYMBOL void S_insert(struct system_base *p_system, int32_t i_typeToSortAfter
 		
 		p_listIter = p_listIter->p_next;
 	}while(p_listIter);
+}
+
+void S_readMessages(struct system_base *p_system){
+	if(!p_system)
+		log_err_lf(RESULT_NULL_SYSTEM);
+	
+	if(!p_system->p_meta)
+		log_err_lf(RESULT_NULL_METADATA);
+	
+	if(p_system->p_meta->m_destroyed)
+		log_err_lf(RESULT_SYSTEM_DESTROYED);
+	
+	if(!p_system->p_messages)
+		log_err_lf(RESULT_NULL_SYSTEM_MESSAGES);
+	
+	if(p_system->vtable->readMessages)
+		p_system->vtable->readMessages(p_system, W_findSystemParentWorld(p_system));
+	
+	if(!p_system->p_messages)
+		log_err_lf(RESULT_NULL_SYSTEM_MESSAGES);
+	
+	free_debug(p_system->p_messages, sizeof *p_system->p_messages * p_system->m_messageCount);
+	
+	ALLOC(p_system->p_messages, 1);
+	p_system->m_messageCount = 0;
+}
+
+DLL_SYMBOL void S_addMessage(struct system_base *p_system, struct message *p_message){
+	if(!p_system)
+		log_err_lf(RESULT_NULL_SYSTEM);
+	
+	if(!p_system->p_meta)
+		log_err_lf(RESULT_NULL_METADATA);
+	
+	if(p_system->p_meta->m_destroyed)
+		log_err_lf(RESULT_SYSTEM_DESTROYED);
+	
+	if(!p_system->p_messages)
+		log_err_lf(RESULT_NULL_SYSTEM_MESSAGES);
+	
+	if(!p_message)
+		log_err_lf(RESULT_NULL_MESSAGE);
+	
+	if(p_system->m_messageCount > 0){
+		struct message **oldTable = p_system->p_messages;
+		
+		ALLOC(p_system->p_messages, p_system->m_messageCount + 1);
+		
+		memcpy(p_system->p_messages, oldTable, sizeof *p_system->p_messages * p_system->m_messageCount);
+	}else
+		*p_system->p_messages = p_message;
+	
+	p_system->m_messageCount++;
 }

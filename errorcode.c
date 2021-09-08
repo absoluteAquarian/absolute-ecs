@@ -68,6 +68,18 @@ DLL_SYMBOL void log_err(enum ERRCODE errcode, int64_t line, const char* file){
 		case RESULT_NOT_REGISTERED_SYSTEM_TYPE:
 			fprintf(stderr, "ERROR: System type could not be found");
 			break;
+		case RESULT_NULL_SYSTEM_MESSAGES:
+			fprintf(stderr, "ERROR: System message table was not initialized");
+			break;
+		case RESULT_SYSTEM_DESTROYED:
+			fprintf(stderr, "ERROR: Attempted to perform an action on a system that's been destroyed");
+			break;
+		case RESULT_NULL_MESSAGE:
+			fprintf(stderr, "ERROR: Message was null");
+			break;
+		case RESULT_INVALID_SYSTEM_INDEX:
+			fprintf(stderr, "ERROR: Sysem index was outside the bounds of the world's system table");
+			break;
 		default:
 			fprintf(stderr, "ERROR: unknown error code (%d)\n", (int32_t)errcode);
 			exit(-1);
@@ -77,4 +89,11 @@ DLL_SYMBOL void log_err(enum ERRCODE errcode, int64_t line, const char* file){
 	fprintf(stderr, "\n  at file \"%s\" on line %" PRId64 "\n", file, line);
 	
 	exit((int32_t)errcode);
+}
+
+DLL_SYMBOL void log_err_msg(const char* p_msg, int64_t line, const char* file){
+	fprintf(stderr, p_msg);
+	fprintf(stderr, "\n  at file \"%s\" on line %" PRId64 "\n", file, line);
+	
+	exit(-1);
 }

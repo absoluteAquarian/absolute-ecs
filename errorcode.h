@@ -8,6 +8,8 @@
 
 #define log_err_lf(errcode) log_err(errcode, __LINE__, __FILE__)
 
+#define log_err_msg_lf(msg) log_err_msg(msg, __LINE__, __FILE__)
+
 enum ERRCODE{
 	RESULT_OK,
 	RESULT_INIT_ENTITY_TABLE_CAPACITY,
@@ -29,7 +31,11 @@ enum ERRCODE{
 	RESULT_SYSTEM_TABLE_UNINITIALIZED,
 	RESULT_INIT_SYSTEM_TABLE_CAPACITY,
 	RESULT_NOT_REGISTERED_SYSTEM_TYPE,
-	RESULT_CYCLICAL_SYSTEM_STUCTURE
+	RESULT_CYCLICAL_SYSTEM_STUCTURE,
+	RESULT_NULL_SYSTEM_MESSAGES,
+	RESULT_SYSTEM_DESTROYED,
+	RESULT_NULL_MESSAGE,
+	RESULT_INVALID_SYSTEM_INDEX
 };
 
 enum MEMCODE{
@@ -54,6 +60,7 @@ enum MEMCODE{
 	MEM_HEAP_FREE = 0xfeeefeee
 };
 
-DLL_SYMBOL void log_err(enum ERRCODE errcode, int64_t line, const char* file);
+DLL_SYMBOL void log_err    (enum ERRCODE errcode, int64_t line, const char* file);
+DLL_SYMBOL void log_err_msg(const char* p_msg, int64_t line, const char* file);
 
 #endif /* ERRORCODE_H_ */

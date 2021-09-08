@@ -8,6 +8,7 @@
 #include "entity.h"
 #include "errorcode.h"
 #include "utility.h"
+#include "system.h"
 #include "world.h"
 
 struct world **g_worlds;
@@ -180,6 +181,25 @@ DLL_SYMBOL int32_t W_findEntityParentWorld(struct entity *p_entity){
 	int idx = -1;
 	for(int w = 0; w < g_worldCount; w++, p_worldTable++)
 		if(p_worldTable && W_hasEntity(*p_worldTable, p_entity->p_meta->m_id, &idx))
+			return w;
+
+	return -1;
+}
+
+DLL_SYMBOL int32_t W_findSystemParentWorld(struct system_base *p_system){
+	if(!p_system)
+		log_err_lf(RESULT_NULL_WORLD);
+	
+	if(!p_system->p_meta)
+		log_err_lf(RESULT_NULL_METADATA);
+	
+	if(p_system->p_meta->m_destroyed)
+		log_err_lf(RESULT_SYSTEM_DESTROYED);
+	
+	struct world **p_worldTable = g_worlds;
+	int idx = -1;
+	for(int w = 0; w < g_worldCount; w++, p_worldTable++)
+		if(p_worldTable && W_hasSystem(*p_worldTable, p_system->p_meta->m_id, &idx))
 			return w;
 
 	return -1;

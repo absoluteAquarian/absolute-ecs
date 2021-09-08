@@ -30,8 +30,8 @@ enum COMPONENT_TYPE{
 };
 
 struct component{
-	void *p_data;
 	int32_t m_id;
+	void *p_data;
 };
 
 struct component_table{
